@@ -78,6 +78,7 @@ INSTANCE.mkdir(parents=True, exist_ok=True)
 REPORT_DB = INSTANCE / "reports.sqlite3"
 
 app = Flask(__name__)
+app.wsgi_app= ProxyFix(app.wsgi_app,x_host=1)
 app.config.update(
     SECRET_KEY=SECRET_KEY or secrets.token_hex(32),
     DEBUG=False,
