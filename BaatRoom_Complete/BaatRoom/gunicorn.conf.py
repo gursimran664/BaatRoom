@@ -19,11 +19,3 @@ loglevel = "warning"
 capture_output = False
 # ProxyFix is configured explicitly by TRUST_PROXY_COUNT in app.py.
 forwarded_allow_ips = "127.0.0.1,::1"
-
-def on_starting(server):
-    if server.cfg.workers != 1:
-        raise RuntimeError("BaatRoom requires exactly one application worker.")
-    if server.cfg.preload_app:
-        raise RuntimeError("BaatRoom must not preload the application.")
-    if not 4 <= server.cfg.threads <= 512:
-        raise RuntimeError("Use between 4 and 512 threads, with headroom above MAX_CONNECTIONS.")
