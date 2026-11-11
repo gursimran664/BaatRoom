@@ -74,6 +74,8 @@ GENDERS = {"male", "female", "other", "undisclosed"}
 # Public calls use either managed Cloudflare TURN or an existing coturn relay.
 # The provider token / shared secret always stays on this Python server.
 TURN_PROVIDER = os.getenv("TURN_PROVIDER", "auto").strip().lower()
+METERED_USERNAME = os.getenv("METERED_USERNAME", "").strip()
+METERED_PASSWORD = os.getenv("METERED_PASSWORD", "").strip()
 TURN_KEY_ID = os.getenv("TURN_KEY_ID", "").strip()
 TURN_KEY_API_TOKEN = os.getenv("TURN_KEY_API_TOKEN", "").strip()
 ICE_TRANSPORT_POLICY = os.getenv("ICE_TRANSPORT_POLICY", "all").strip().lower()
