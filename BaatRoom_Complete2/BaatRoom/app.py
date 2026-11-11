@@ -325,6 +325,8 @@ def call_service_status():
                           and TURN_KEY_API_TOKEN and not any(c.isspace() for c in TURN_KEY_API_TOKEN))
     elif provider == "coturn":
         configured = bool(TURN_URLS and TURN_SHARED_SECRET)
+    elif provider == "metered":
+        configured = bool(TURN_URLS and METERED_USERNAME and METERED_PASSWORD)
     else:
         configured = provider == "direct" and ICE_TRANSPORT_POLICY != "relay"
     if not configured:
