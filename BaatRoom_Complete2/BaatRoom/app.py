@@ -77,8 +77,8 @@ TURN_PROVIDER = os.getenv("TURN_PROVIDER", "auto").strip().lower()
 TURN_KEY_ID = os.getenv("TURN_KEY_ID", "").strip()
 TURN_KEY_API_TOKEN = os.getenv("TURN_KEY_API_TOKEN", "").strip()
 ICE_TRANSPORT_POLICY = os.getenv("ICE_TRANSPORT_POLICY", "all").strip().lower()
-if TURN_PROVIDER not in {"auto", "cloudflare", "coturn", "direct"}:
-    raise RuntimeError("TURN_PROVIDER must be auto, cloudflare, coturn or direct.")
+if TURN_PROVIDER not in {"auto", "cloudflare", "coturn", "metered", "direct"}:
+    raise RuntimeError("TURN_PROVIDER must be auto, cloudflare, coturn, metered or direct.")
 if ICE_TRANSPORT_POLICY not in {"all", "relay"}:
     raise RuntimeError("ICE_TRANSPORT_POLICY must be all or relay.")
 STUN_URLS = [s.strip() for s in os.getenv("STUN_URLS", "").split(",") if s.strip()]
