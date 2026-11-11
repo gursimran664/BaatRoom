@@ -1,0 +1,86 @@
+BAATROOM - CONNECT AUDIO CALLS WHEN YOU ARE READY
+
+This is the complete updated application, not an add-on ZIP.
+The Cloudflare TURN integration is implemented. A live TURN account is NOT
+included, and audio across internet networks has NOT been tested with your keys.
+You can update the website first and connect the call service later.
+
+UPDATE YOUR EXISTING RENDER WEBSITE
+
+1. Extract this ZIP. Open its BaatRoom folder.
+2. Replace the application files in your existing GitHub repository with the
+   CONTENTS of that folder. Do not upload just the ZIP and expect Render to run it.
+   Keep your current .env/secrets outside GitHub. No .env is included here.
+3. Keep your existing Render service, public URL, SECRET_KEY, OWNER_SECRET and
+   start command. Redeploy the latest commit after updating the source.
+4. Public/private messages continue to work before relay setup. In production,
+   auto mode shows that calls are unavailable until the owner completes setup.
+   New deployments must still set the production values listed in README.md.
+
+CONNECT CLOUDFLARE TURN - ONLY TWO ACCOUNT VALUES
+
+1. Sign in to your own Cloudflare account and open Realtime > TURN Server.
+   Create a TURN key for BaatRoom. Obtain its TURN Key ID and TURN API Token.
+   Use the TURN key's API token, not your account's Global API Key.
+2. Open Render Dashboard > your existing web service > Environment.
+3. Add these keys using the values from YOUR Cloudflare TURN account:
+
+   TURN_KEY_ID            = your TURN Key ID
+   TURN_KEY_API_TOKEN     = your TURN API Token
+
+4. TURN_PROVIDER defaults to auto. If you previously changed it, set it to
+   cloudflare (or auto). Keep ICE_TRANSPORT_POLICY=all for normal operation.
+5. Choose Save and deploy (or Save, rebuild, and deploy) so the running app
+   receives the new settings. Saving without deploying does not apply them yet.
+6. Reload the website. Each guest enables Allow audio calls in Guest settings.
+   Open a private conversation, start the call and have the other guest accept.
+   Allow microphone access in both browsers. No phone number or camera is used.
+
+Cloudflare runs the relay separately from Render. You do not need to move the
+website or its domain to Cloudflare to use this integration. Check the provider's
+current pricing and account limits before enabling it; this is not a promise of
+unlimited free relay traffic. Visitors do not need accounts or payment.
+
+CHECK THE CONNECTION
+
+Use two real devices: one on Wi-Fi and the other on mobile data, in Chrome or
+Safari. Avoid Instagram's in-app browser for the first test. Speak both ways,
+then test mute, unmute, end and decline. A decline still enforces a two-minute
+cooldown for that caller.
+
+To prove the relay works, temporarily set ICE_TRANSPORT_POLICY=relay in Render,
+deploy and repeat the two-device test. Restore all and deploy afterwards unless
+you want to require the relay for every call. Successful credential generation
+alone does not prove media delivery.
+
+Optional, from a local terminal or an available Render Shell with the same env:
+
+python app.py check-calls
+
+This contacts the selected provider and checks credential generation. It prints
+no API tokens, relay usernames or passwords. It does not test actual audio.
+
+IF SOMETHING FAILS
+
+- Owner setup message: check both variable names, values and deployment status.
+- Temporarily unavailable: check the TURN key is active, its API token is correct,
+  account usage/limits permit requests, and Render can reach the provider.
+  Failed requests have a short retry delay; wait at least fifteen seconds.
+- Audio still fails: allow both microphones, use HTTPS and an external browser,
+  then test a different network and relay-only mode. Check the provider dashboard.
+- There is no silent fallback to a fake or unrelated public relay.
+- Keep TURN_KEY_API_TOKEN and TURN_SHARED_SECRET out of GitHub, page source,
+  screenshots and chat. Only expiring relay credentials reach call participants.
+
+ALTERNATIVE: AN EXISTING COTURN RELAY
+
+Set TURN_PROVIDER=coturn, TURN_URLS to your actual relay addresses, and
+TURN_SHARED_SECRET to the same static-auth-secret used by your coturn server.
+STUN_URLS is optional. The relay must already have working DNS/firewall/TLS and
+REST authentication. Cloudflare's API token is not a coturn shared secret.
+
+OFFICIAL REFERENCES
+
+https://developers.cloudflare.com/realtime/turn/generate-credentials/
+https://developers.cloudflare.com/realtime/sfu/platform/pricing/
+https://render.com/docs/configure-environment-variables

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en" data-theme="ember" data-glow="on">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#101214">
+  <title>{{ app_name }} — A little less scrolling. A little more talking.</title>
+  <meta name="description" content="One public room. Real conversations. Pick a nickname and join Everyone on {{ app_name }}. No account or app needed.">
+  <link rel="canonical" href="{{ share_url }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ app_name }} — Come hang out.">
+  <meta property="og:description" content="A room for everyone. Pick a nickname and join the conversation. No account needed.">
+  <meta property="og:url" content="{{ share_url }}">
+  <meta property="og:image" content="{{ share_url }}static/share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script id="page-config" type="application/json">{{ {"name": app_name, "shareUrl": share_url}|tojson }}</script>
+  <script src="{{ url_for('static', filename='vendor/socket.io.min.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/calls.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/chat.js') }}" defer></script>
+</head>
+<body>
+<svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+ <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 1-8.5 8L4 21l1.5-5A8 8 0 1 1 20 11.5Z"/><path d="M8 10h8M8 14h5"/></symbol>
+ <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+ <symbol id="i-send" viewBox="0 0 24 24"><path d="m21 3-7 18-4-7-7-4L21 3ZM10 14 21 3"/></symbol>
+ <symbol id="i-invite" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m9 10 6-3M9 14l6 3"/></symbol>
+ <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m3 10v-3a6 6 0 0 0-2-4"/></symbol>
+ <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+ <symbol id="i-glow" viewBox="0 0 24 24"><path d="m12 3 2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6L12 3Z"/></symbol>
+ <symbol id="i-leave" viewBox="0 0 24 24"><path d="M10 4H4v16h6m4-13 5 5-5 5m-7-5h12"/></symbol>
+ <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></symbol>
+ <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v16m-6-6 6 6 6-6"/></symbol>
+ <symbol id="i-phone" viewBox="0 0 24 24"><path d="m5 3 4 1 1 5-3 2a14 14 0 0 0 6 6l2-3 5 1 1 4c-1 5-10 1-14-3S-1 4 5 3Z"/></symbol>
+</svg>
+<div class="app" id="app">
+  <aside class="sidebar" aria-label="Room navigation">
+    <a class="brand" href="/" aria-label="{{ app_name }} chat">
+      <span class="brand-mark"><svg class="icon"><use href="#i-chat"/></svg></span>
+      <span>{{ app_name }}<span class="brand-dot">.</span></span>
+    </a>
+    <div class="sidebar-intro">Good company.<br>One shared space.</div>
+    <div class="section-label">YOUR ROOM <span class="small-led"></span></div>
+    <button class="room-item" id="everyone-room" aria-current="page" type="button">
+      <span class="room-hash">#</span><div><strong>Everyone</strong><span>The door is always open</span></div>
+      <span class="room-dot"></span>
+    </button>
+    <div class="sidebar-spacer"></div>
+    <section class="glow-card" aria-label="LED themes">
+      <div class="glow-card-title"><svg class="icon"><use href="#i-glow"/></svg><span>Set the mood</span><span class="tiny-tag">LED</span></div>
+      <p>Your corner. Your colour.</p>
+      <div class="theme-swatches" aria-label="Choose a theme">
+        <button class="swatch ember" data-set-theme="ember" aria-label="Ember LED theme" aria-pressed="true"><span></span></button>
+        <button class="swatch aurora" data-set-theme="aurora" aria-label="Aurora LED theme" aria-pressed="false"><span></span></button>
+        <button class="swatch ultraviolet" data-set-theme="ultraviolet" aria-label="Ultraviolet LED theme" aria-pressed="false"><span></span></button>
+        <button class="swatch arctic" data-set-theme="arctic" aria-label="Arctic LED theme" aria-pressed="false"><span></span></button>
+      </div>
+      <button class="text-button appearance-link" data-open="appearance-dialog">Ember <span>↗</span></button>
+    </section>
+    <div class="guest-card">
+      <div class="avatar self-avatar" id="self-avatar">?</div>
+      <div class="guest-copy"><strong id="self-name">Your seat is waiting</strong><span id="self-suffix">No account needed</span><button class="text-button" data-open="preferences-dialog">Guest settings</button></div>
+      <button class="icon-button leave-button" title="Leave Chat" aria-label="Leave Chat" disabled><svg class="icon"><use href="#i-leave"/></svg></button>
+    </div>
+    <button class="privacy-link text-button" data-open="privacy-dialog"><svg class="icon"><use href="#i-shield"/></svg> Public room & privacy</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="room-heading">
+        <span class="mobile-brand brand-mark"><svg class="icon"><use href="#i-chat"/></svg></span>
+        <div class="room-heading-copy"><div class="room-title"><span class="desktop-room-name">Everyone</span><span class="mobile-site-name">{{ app_name }}</span><span class="public-tag">PUBLIC ROOM</span></div><p><span class="desktop-room-subtitle">Drop in. Say something.</span><span class="mobile-room-subtitle">Everyone · Public room</span></p></div>
+      </div>
+      <div class="header-actions">
+        <button id="online-button" class="online-pill" aria-expanded="false" aria-controls="participants"><span class="status-dot"></span><span id="online-count">— online</span><svg class="icon"><use href="#i-users"/></svg></button>
+        <button class="icon-button mood-button" data-open="appearance-dialog" aria-label="LED themes"><svg class="icon"><use href="#i-glow"/></svg></button>
+        <button class="invite-button" id="invite-button" aria-label="Invite Friends"><svg class="icon"><use href="#i-invite"/></svg><span>Invite Friends</span></button>
+      </div>
+    </header>
+    <div class="room-strip"><span><span class="small-led"></span><span id="connection-state" role="status">Getting the room ready…</span></span><button class="text-button" data-open="privacy-dialog"><svg class="icon"><use href="#i-shield"/></svg><span>Temporary by design</span></button></div>
+    <nav class="conversation-tabs" id="conversation-tabs" aria-label="Choose conversation"></nav>
+    <div class="chat-context" id="chat-context"><span id="conversation-label">Everyone · Public group</span><div><button id="private-block-button" class="text-button" hidden>Block guest</button><button id="audio-call-button" class="context-call" hidden><svg class="icon"><use href="#i-phone"/></svg>Audio call</button><button class="text-button" data-open="preferences-dialog">Guest settings</button></div></div>
+    <section class="call-panel" id="call-panel" aria-label="Audio call controls" hidden><div><strong id="call-peer"></strong><span id="call-status" role="status"></span></div><div class="call-buttons"><button id="resume-audio" class="context-call" hidden>Play call audio</button><button id="call-mute" class="context-call" aria-pressed="false" hidden>Mute microphone</button><button id="call-hangup" class="danger-button">End call</button></div></section>
+    <div class="chat-body">
+      <section class="conversation" aria-label="Everyone group chat">
+        <div class="connection-banner" id="connection-banner" hidden><span id="connection-detail">Reconnecting…</span><button id="reconnect-button" class="text-button">Try again</button></div>
+        <div class="messages" id="messages" tabindex="0" aria-label="Conversation messages">
+          <div class="room-welcome" id="room-welcome">
+            <div class="welcome-orbit"><span class="orbit-dot"></span><span class="welcome-icon"><svg class="icon"><use href="#i-chat"/></svg></span></div>
+            <span class="eyebrow">LESS SCROLLING. MORE TALKING.</span>
+            <h1>A room for <span>everyone.</span></h1>
+            <p>No profiles to perfect. No followers to count.<br>Just a nickname and a conversation.</p>
+            <div class="welcome-tags"><span>No account</span><span>Every language welcome</span><span>Hello 👋</span></div>
+          </div>
+          <div class="history-divider"><span>ONE SHARED CONVERSATION</span></div>
+          <div id="timeline"></div>
+          <div class="empty-state" id="empty-state">Quiet in here. Your hello could start something.</div>
+        </div>
+        <button class="new-messages" id="new-messages" hidden><span>New messages</span><svg class="icon"><use href="#i-down"/></svg></button>
+        <div class="typing-line" id="typing-line" role="status" aria-live="polite"></div>
+        <div class="composer-wrap">
+          <div class="restriction" id="mute-state" role="status" hidden></div>
+          <form class="composer" id="composer">
+            <label for="message-input" class="sr-only">Message Everyone</label>
+            <textarea id="message-input" rows="1" placeholder="Say hello to Everyone…" maxlength="4000" disabled aria-describedby="composer-hint" enterkeyhint="send"></textarea>
+            <button class="send-button" id="send-button" type="submit" aria-label="Send message" disabled><svg class="icon"><use href="#i-send"/></svg></button>
+          </form>
+          <p class="message-rules">No links, numbers or abusive language.</p>
+          <div class="composer-footer"><span id="composer-hint"><span class="desktop-hint">Enter to send <span class="hint-dot">·</span> Shift + Enter for a new line</span><span class="mobile-hint">Everyone can read what you send</span></span><span id="char-count">0 / 1,000</span></div>
+          <div class="mobile-bottom"><button class="text-button" data-open="privacy-dialog">Chat & privacy</button><button class="text-button leave-button" disabled>Leave Chat <span>↗</span></button></div>
+        </div>
+      </section>
+      <aside class="participants" id="participants" aria-label="Connected guest sessions" hidden>
+        <div class="panel-heading"><div><span class="eyebrow">HERE, RIGHT NOW</span><h2>Good company<span class="brand-dot">.</span></h2></div><button class="icon-button" id="close-participants" aria-label="Close participant list"><svg class="icon"><use href="#i-close"/></svg></button></div>
+        <p class="panel-note">Choose Message to open a private chat. Gender is optional and self-reported. This counts connected guest sessions, not verified people; extra tabs count once.</p>
+        <ul class="participant-list" id="participant-list"></ul>
+        <p class="panel-bottom">A nickname can be made up. A conversation can still be real.</p>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<dialog class="join-dialog" id="join-dialog" aria-labelledby="join-title">
+  <form id="join-form">
+    <div class="join-top"><span class="brand-mark"><svg class="icon"><use href="#i-chat"/></svg></span><span class="join-brand">{{ app_name }}<span class="brand-dot">.</span></span><span class="tiny-tag">COME AS YOU ARE</span></div>
+    <div class="join-rule"></div>
+    <span class="eyebrow">THERE’S A SEAT FOR YOU</span>
+    <h2 id="join-title">What should we<br>call you?</h2>
+    <p class="join-copy">Choose a nickname. Gender is optional.</p>
+    <label for="nickname" class="sr-only">What should we call you?</label>
+    <input id="nickname" name="nickname" placeholder="Your nickname" autocomplete="off" autocapitalize="off" spellcheck="false" minlength="2" maxlength="48" required aria-describedby="nickname-help join-error">
+    <div id="nickname-help" class="field-hint">2–24 characters. Make it up. Make it you.</div>
+    <label for="gender" class="select-label">Gender <span class="field-hint">(optional, visible to other guests)</span></label>
+    <select id="gender" name="gender"><option value="undisclosed">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
+    <p class="form-error" id="join-error" role="alert" hidden></p>
+    <button class="join-submit" id="join-submit" type="submit"><span>Start Chatting</span><svg class="icon"><use href="#i-arrow"/></svg></button>
+    <div class="join-foot"><span class="small-led"></span>Everyone is a public group. <button type="button" class="text-button" data-open="privacy-dialog">Privacy</button></div>
+  </form>
+</dialog>
+
+<dialog class="standard-dialog" id="appearance-dialog" aria-labelledby="appearance-title">
+ <div class="dialog-heading"><span class="eyebrow">A LITTLE ATMOSPHERE</span><button class="icon-button" data-close aria-label="Close appearance settings"><svg class="icon"><use href="#i-close"/></svg></button></div>
+ <h2 id="appearance-title">Find your glow<span class="brand-dot">.</span></h2>
+ <p>LED colours that feel like your kind of night.</p>
+ <div class="theme-options">
+   <button data-set-theme="ember" class="theme-option ember" aria-pressed="true"><span class="theme-sample"></span><span><strong>Ember</strong><small>Warm light. Easy conversation.</small></span><span class="theme-check">✓</span></button>
+   <button data-set-theme="aurora" class="theme-option aurora" aria-pressed="false"><span class="theme-sample"></span><span><strong>Aurora</strong><small>A fresh, electric green.</small></span><span class="theme-check">✓</span></button>
+   <button data-set-theme="ultraviolet" class="theme-option ultraviolet" aria-pressed="false"><span class="theme-sample"></span><span><strong>Ultraviolet</strong><small>A little after-hours energy.</small></span><span class="theme-check">✓</span></button>
+   <button data-set-theme="arctic" class="theme-option arctic" aria-pressed="false"><span class="theme-sample"></span><span><strong>Arctic</strong><small>Cool blue. Clear head.</small></span><span class="theme-check">✓</span></button>
+ </div>
+ <label class="toggle-row" for="glow-toggle"><span><strong>LED glow</strong><small>Soft light around the edges</small></span><input id="glow-toggle" type="checkbox" checked role="switch"></label>
+ <p class="small-note">Saved on this device. Reduced-motion preferences are respected.</p>
+</dialog>
+
+<dialog class="standard-dialog privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-title">
+ <div class="dialog-heading"><span class="eyebrow">KNOW THE ROOM</span><button class="icon-button" data-close aria-label="Close privacy information"><svg class="icon"><use href="#i-close"/></svg></button></div>
+ <h2 id="privacy-title">Public. Temporary.<br>Still worth being careful.</h2>
+ <div class="privacy-copy">
+  <p><strong>Everyone is public.</strong> Private messages are delivered only to the two guest sessions in that conversation. Other people in those sessions' tabs can read them too. Nicknames and gender choices are not verified. Recipients can copy or screenshot messages.</p>
+  <p>Ordinary history stays in server memory: at most <span id="privacy-limit">100</span> recent messages per conversation for up to <span id="privacy-ttl">one hour</span>, with a separate server-wide cap on private messages. Every message expires from its original sending time, including in connected browsers. Restarting the server clears ordinary history. Leaving deletes that guest's private history from both participants.</p>
+  <p>The server processes connection information to run the chat and limit spam. Hosting providers may retain technical logs. Messages are <strong>not end-to-end encrypted</strong>; use HTTPS when sharing publicly.</p>
+  <p>A successfully saved report immediately removes that message for all its recipients. A copy, reason, temporary guest reference and time remain in the owner's report inbox for up to 24 hours. Reporting does not establish wrongdoing. Report limits help reduce misuse. The owner can review reports and temporarily mute or disconnect guest sessions.</p>
+  <p>Blocking hides a guest's messages for you and stops private messages and calls between those guest sessions. A personal block does not remove the guest from Everyone. A new session can bypass temporary restrictions. Deletion cannot remove screenshots or copies.</p>
+  <p>Numbers, links, contact addresses and known abusive words are filtered in both kinds of chat. The filter can miss disguised content or reject harmless text; it cannot understand every harmful message. The same text is limited to five accepted sends per hour, with a twenty-second repeat gap.</p>
+  <p>Audio calls use WebRTC inside the browser, without phone numbers or recording. Calls start off; enable them in Guest settings. Accept or decline each incoming call. Microphone permission is requested only when you start or accept a call. No camera permission is requested. WebRTC may reveal network addresses to the other caller; a configured relay may process media. Public internet calls need HTTPS and usually a configured TURN relay.</p>
+  <p>No accounts, advertising trackers, analytics, fingerprinting or external fonts. A session cookie keeps your temporary identity and server-held preferences. Themes use local storage; nickname and local message hiding use session storage.</p>
+ </div>
+ <div class="blocked-row"><span id="blocked-count">0 locally blocked guests</span><button class="text-button" id="unblock-button">Unblock all</button></div>
+</dialog>
+
+<dialog class="standard-dialog compact-dialog" id="actions-dialog" aria-labelledby="actions-title">
+ <div class="dialog-heading"><span class="eyebrow">YOUR CONVERSATION</span><button class="icon-button" data-close aria-label="Close message actions"><svg class="icon"><use href="#i-close"/></svg></button></div>
+ <h2 id="actions-title">Message options</h2><p id="actions-guest"></p>
+ <button class="action-row" id="private-message-button">Private message <span>Open a conversation with this guest</span></button>
+ <button class="action-row" id="block-button">Block guest <span>Hide messages for you and stop private messages and calls</span></button>
+ <button class="action-row" id="report-button">Report message <span>Remove it for all recipients and send a copy to the owner</span></button>
+</dialog>
+
+<dialog class="standard-dialog compact-dialog" id="report-dialog" aria-labelledby="report-title">
+ <form id="report-form">
+  <div class="dialog-heading"><span class="eyebrow">KEEP THE ROOM KIND</span><button type="button" class="icon-button" data-close aria-label="Close report form"><svg class="icon"><use href="#i-close"/></svg></button></div>
+  <h2 id="report-title">Report this message</h2><p>Once received, this removes the message for all its recipients and sends the owner a copy. Report only genuine concerns. Reports expire after 24 hours.</p>
+  <label class="select-label" for="report-reason">Reason</label>
+  <select id="report-reason" required><option value="spam">Spam or repeated messages</option><option value="harassment">Harassment or hate</option><option value="inappropriate">Inappropriate content</option><option value="personal_information">Sharing personal information</option><option value="other">Something else</option></select>
+  <p id="report-error" class="form-error" role="alert" hidden></p>
+  <button class="join-submit" id="report-submit" type="submit">Send report <svg class="icon"><use href="#i-arrow"/></svg></button>
+ </form>
+</dialog>
+
+<dialog class="standard-dialog compact-dialog" id="share-dialog" aria-labelledby="share-title">
+ <div class="dialog-heading"><span class="eyebrow">BETTER WITH COMPANY</span><button class="icon-button" data-close aria-label="Close invite dialog"><svg class="icon"><use href="#i-close"/></svg></button></div>
+ <h2 id="share-title">Bring your people<span class="brand-dot">.</span></h2><p>Copy this link and send it wherever your friends are.</p>
+ <label for="share-url" class="sr-only">Chat invite link</label><input id="share-url" readonly>
+ <button id="copy-link" class="join-submit">Copy link <svg class="icon"><use href="#i-invite"/></svg></button>
+ <p id="share-help" class="small-note" role="status">Or select the link and copy it manually.</p>
+</dialog>
+
+<dialog class="standard-dialog" id="preferences-dialog" aria-labelledby="preferences-title">
+ <form id="preferences-form">
+  <div class="dialog-heading"><span class="eyebrow">YOUR CHOICE</span><button type="button" class="icon-button" data-close aria-label="Close guest settings"><svg class="icon"><use href="#i-close"/></svg></button></div>
+  <h2 id="preferences-title">Guest settings<span class="brand-dot">.</span></h2>
+  <p>No phone number or account needed. These choices last for this guest session.</p>
+  <label class="select-label" for="settings-gender">Gender (optional)</label>
+  <select id="settings-gender"><option value="undisclosed">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
+  <p class="small-note">Your selection is visible to other guests and is not verified.</p>
+  <label class="toggle-row" for="private-toggle"><span><strong>Allow private messages</strong><small>People can message your guest session directly</small></span><input id="private-toggle" type="checkbox" role="switch" checked></label>
+  <label class="toggle-row" for="calls-toggle"><span><strong>Allow audio calls</strong><small>Off by default. You can accept or decline each call.</small></span><input id="calls-toggle" type="checkbox" role="switch"></label>
+  <p id="call-service-note" class="small-note" role="status">Checking audio call availability…</p>
+  <p class="small-note">Declining a call stops that caller from trying you again for two minutes. Use HTTPS and allow microphone access when starting or accepting.</p>
+  <p id="preferences-error" class="form-error" role="alert" hidden></p>
+  <button id="preferences-save" class="join-submit" type="submit">Save settings <svg class="icon"><use href="#i-arrow"/></svg></button>
+ </form>
+</dialog>
+
+<dialog class="standard-dialog compact-dialog" id="incoming-call-dialog" aria-labelledby="incoming-call-title">
+ <span class="eyebrow">INCOMING AUDIO CALL</span><h2 id="incoming-call-title">Someone is calling</h2><p id="incoming-call-peer"></p>
+ <p>You choose whether to answer. Accept requests microphone access. No phone number, camera or recording.</p>
+ <div class="incoming-actions"><button id="decline-call" class="danger-button">Decline</button><button id="accept-call" class="context-call">Accept call</button></div>
+</dialog>
+<audio id="remote-audio" autoplay playsinline></audio>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="sr-only" id="message-announcer" aria-live="polite" aria-atomic="true"></div>
+<noscript><div class="noscript">JavaScript is needed for live chat. Enable it, then reload this page.</div></noscript>
+</body>
+</html>

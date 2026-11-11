@@ -1,0 +1,60 @@
+BAATROOM - START HERE
+
+Extract this ZIP and open the BaatRoom folder in VS Code.
+Install Python 3.11 or later. Open Terminal and run each command separately:
+
+python -m venv .venv
+
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+.\.venv\Scripts\python.exe app.py
+
+Open http://127.0.0.1:5000
+
+With your environment activated, you can start with: python app.py
+Do not double-click app.py or open chat.html directly.
+
+WHAT CHANGED
+- Managed Cloudflare TURN support: add TWO values in Render later to connect it.
+- Clear call availability instead of repeated setup failures when keys are absent.
+- Existing coturn support is still available. See CONNECT_CALLS_LATER.txt.
+- Public group + private messages from the online participant list.
+- Optional, editable gender choice. All buttons/instructions are in English.
+- Browser audio calls without phone numbers. Calls start OFF.
+- Guest settings: turn private messages/calls on or off.
+- Accept, Decline, Mute/Unmute and End call.
+- Declining stops the same caller from retrying you for two minutes.
+- Block a guest for yourself, including their private messages and calls.
+- Reporting a message removes it for all recipients after the report is saved.
+- Known abusive words, numbers and recognizable links/contact addresses filtered.
+- Same text at most five accepted sends/hour, with a twenty-second repeat gap.
+- Text remains multilingual. Four LED themes are included.
+
+PRIVACY
+Messages expire from sending time within one hour, including in the browser.
+Latest 100 per conversation; private messages also have a server-wide memory cap.
+Restarting clears ordinary chat. Leaving removes your private history for both
+participants. Report copies can remain for 24 hours. Screenshots/copies cannot
+be erased. Private messages are not end-to-end encrypted. Filters and report
+limits cannot prevent every harmful message or false report.
+
+CALLS
+Enable Allow audio calls in BOTH guests' Guest settings. Open a private chat
+and choose Audio call. The other guest must accept. Microphone permission is
+requested only when starting/accepting; no camera or recording is used.
+Use independent browsers to test two guests. Extra tabs count as the same guest.
+HTTPS or localhost is needed for the microphone. Public calls require a configured
+relay in auto mode. No relay account or keys are bundled. Text chat works before
+call setup. CONNECT_CALLS_LATER.txt explains how to connect the relay when ready.
+The app generates expiring relay credentials; the master API token stays private.
+
+PUBLIC SHARING
+Localhost works on your own computer only. GitHub Pages cannot run Flask.
+README.md covers a long-running Python/WebSocket HTTPS host, required secrets,
+public URL, optional TURN setup and the one-worker production command.
+Nothing in this delivery has been uploaded to GitHub or publicly deployed.
+
+OWNER CONTROLS / RENAME
+See README.md and .env.example. Set APP_NAME to rename the website.
+The SQLite report database is created automatically. Keep .env and all secrets
+out of GitHub. No accounts, API keys or phone numbers are needed for text chat.
