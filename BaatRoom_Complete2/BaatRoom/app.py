@@ -412,6 +412,17 @@ def rtc_configuration(guest):
         username = f'{int(now() + MAX_CALL_SECONDS + 600)}:{guest["id"]}'
         credential = base64.b64encode(hmac.new(TURN_SHARED_SECRET.encode(), username.encode(), hashlib.sha1).digest()).decode()
         servers.append({"urls": TURN_URLS, "username": username, "credential": credential})
+    elif provider == "metered":
+       if not METERED_USERNAME or not METERED_PASSWORD:
+           raise CallSetupError(
+               "calls_not_configured",
+               "Metered TURN credentials are missing."
+           )
+       servers.append({
+           "urls": TURN_URLS,
+           "username": METERED_USERNAME,
+           "credential": METERED_PASSWORD
+       })
     return {"iceServers": servers, "iceTransportPolicy": ICE_TRANSPORT_POLICY}
 
 
